@@ -1,0 +1,7 @@
+# Use Python 3.10 or 3.11. This tutorial-compatible MediaPipe API is not in 3.14's package.
+opencv-python>=4.10,<5
+mediapipe==0.10.21
+numpy>=1.26,<2
+pyautogui>=0.9.54
+pynput>=1.7.7
+pytest>=8,<9

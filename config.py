@@ -1,0 +1,18 @@
+"""Central settings. Change values here instead of hunting through the code."""
+from pathlib import Path
+
+CAMERA_INDEX = 0
+WINDOW_TITLE = "Virtual Mouse Using Hand Gestures"
+DEBUG_MODE = False
+MAX_NUM_HANDS = 1
+MIN_DETECTION_CONFIDENCE = 0.70
+MIN_TRACKING_CONFIDENCE = 0.70
+FINGER_STRAIGHT_ANGLE = 160.0
+FINGER_BENT_ANGLE = 135.0
+THUMB_CLOSED_DISTANCE = 0.12
+THUMB_OPEN_DISTANCE = 0.18
+ACTIVE_FRAME_MARGIN = 0.10
+SMOOTHING_ALPHA = 0.78
+STABLE_FRAMES_REQUIRED = 4
+ACTION_COOLDOWN_SECONDS = 0.65
+SCREENSHOTS_DIRECTORY = Path(__file__).parent / "screenshots"
