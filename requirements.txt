@@ -4,4 +4,6 @@ mediapipe==0.10.21
 numpy>=1.26,<2
 pyautogui>=0.9.54
 pynput>=1.7.7
+Flask>=3,<4
+Flask-Cors>=5,<7
 pytest>=8,<9

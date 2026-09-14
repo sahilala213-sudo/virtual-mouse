@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Mouse</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="navbar">
+    <h1>Virtual Mouse</h1>
+    <span class="status">Hand Tracking Demo</span>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <p class="eyebrow">AI-powered computer control</p>
+      <h2>Control your mouse<br>with hand gestures.</h2>
+      <p>
+        Track your hand in real time using your webcam.
+        Move your hand in front of the camera to see landmarks. To control
+        your computer mouse, also run the local Python companion server.
+      </p>
+    </section>
+
+    <section class="camera-card">
+      <div class="camera-header">
+        <h3>Live Hand Tracking</h3>
+        <span id="cameraStatus">Camera stopped</span>
+      </div>
+
+      <div class="video-wrapper">
+        <video id="video" autoplay playsinline></video>
+        <canvas id="overlay"></canvas>
+        <div id="placeholder">Camera preview will appear here</div>
+      </div>
+
+      <div class="gesture-info">
+        <div>
+          <span>Hand</span>
+          <strong id="handStatus">Not detected</strong>
+        </div>
+        <div>
+          <span>Gesture</span>
+          <strong id="gestureStatus">None</strong>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="startBtn">Start Camera</button>
+        <button id="stopBtn" disabled>Stop Camera</button>
+      </div>
+
+      <p id="errorMessage" class="error"></p>
+      <p id="serverStatus" class="server-status">Local mouse control: checking…</p>
+    </section>
+  </main>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
