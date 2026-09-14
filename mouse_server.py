@@ -7,7 +7,9 @@ from pathlib import Path
 
 WEB_DIRECTORY = Path(__file__).parent / "web"
 PORT = 8765
-app = Flask(__name__)
+# Serve index.html, CSS, and JavaScript from the same local application.
+# Without this, the page loads but its controls and hand-tracking code do not.
+app = Flask(__name__, static_folder=str(WEB_DIRECTORY), static_url_path="")
 
 CORS(
     app,
