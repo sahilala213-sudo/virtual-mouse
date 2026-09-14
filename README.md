@@ -43,6 +43,15 @@ python main.py
 
 Allow Camera access when macOS asks. For real mouse clicks, allow the terminal/Python app in **System Settings → Privacy & Security → Accessibility**. Screenshot saving may also need **Screen Recording** permission.
 
+## Easiest way to use the web app
+
+1. Complete the one-time install above.
+2. Double-click `start_virtual_mouse.command`. It starts the local mouse-control server and opens the app in your browser.
+3. In **System Settings → Privacy & Security → Accessibility**, enable the terminal application that opened the server. Without this macOS permission, websites cannot move or click your cursor.
+4. Click **Start Camera**. Point your index finger to move, pinch thumb + index to left-click, thumb + middle to right-click, and pinch all three to double-click.
+
+The public GitHub Pages URL is a hand-tracking interface. For safety, a hosted browser page cannot control your computer directly; it connects only to the companion server running on your own Mac.
+
 Press `q` to stop and `d` to show/hide angle and distance debugging data.
 
 ## Configuration

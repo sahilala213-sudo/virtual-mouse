@@ -167,6 +167,24 @@ button:disabled {
   font-size: 13px;
 }
 
+.help-card {
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  color: #cbd5e1;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.help-card p + p {
+  margin-top: 8px;
+}
+
+code {
+  color: #7dd3fc;
+}
+
 @media (max-width: 600px) {
   .camera-header,
   .controls {

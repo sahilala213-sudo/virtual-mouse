@@ -1,8 +1,11 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import pyautogui
 import time
+import webbrowser
+from pathlib import Path
 
+WEB_DIRECTORY = Path(__file__).parent / "web"
 app = Flask(__name__)
 
 CORS(
@@ -28,10 +31,27 @@ click_cooldown = 0.7
 
 @app.route("/", methods=["GET"])
 def home():
+    return send_from_directory(WEB_DIRECTORY, "index.html")
+
+
+@app.route("/health", methods=["GET"])
+def health():
     return jsonify({
         "success": True,
-        "message": "Virtual Mouse Server is running"
+        "message": "Virtual Mouse local companion is running"
     })
+
+
+def normalized_position(data):
+    try:
+        x = float(data.get("x"))
+        y = float(data.get("y"))
+    except (TypeError, ValueError):
+        return None
+
+    if not 0 <= x <= 1 or not 0 <= y <= 1:
+        return None
+    return x, y
 
 
 @app.route("/move", methods=["POST", "OPTIONS"])
@@ -41,8 +61,10 @@ def move_mouse():
 
     data = request.get_json(silent=True) or {}
 
-    x = float(data.get("x", 0))
-    y = float(data.get("y", 0))
+    position = normalized_position(data)
+    if position is None:
+        return jsonify({"success": False, "message": "x and y must be between 0 and 1"}), 400
+    x, y = position
 
     screen_x = int(x * screen_width)
     screen_y = int(y * screen_height)
@@ -78,6 +100,8 @@ def click_mouse():
 
     data = request.get_json(silent=True) or {}
     button = data.get("button", "left")
+    if button not in {"left", "right"}:
+        return jsonify({"success": False, "message": "Unsupported mouse button"}), 400
 
     if button == "right":
         pyautogui.click(button="right")
@@ -120,6 +144,7 @@ def double_click_mouse():
 
 
 if __name__ == "__main__":
+    webbrowser.open("http://127.0.0.1:5000")
     app.run(
         host="127.0.0.1",
         port=5000,

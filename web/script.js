@@ -20,7 +20,9 @@ const serverStatus = document.getElementById("serverStatus");
 
 // The hosted page talks only to a companion server running on this computer.
 // A browser cannot directly control the operating-system cursor.
-const serverUrl = new URLSearchParams(window.location.search).get("server") || "http://127.0.0.1:5000";
+const isLocalApp = ["127.0.0.1", "localhost"].includes(window.location.hostname);
+const serverUrl = new URLSearchParams(window.location.search).get("server") ||
+  (isLocalApp ? window.location.origin : "http://127.0.0.1:5000");
 
 let stream = null;
 let handLandmarker = null;
@@ -30,9 +32,9 @@ let cameraRunning = false;
 let lastMouseTime = 0;
 const mouseUpdateInterval = 35;
 
-let lastGesture = "None";
 let lastGestureTime = 0;
-const gestureCooldown = 700;
+let gestureLocked = false;
+const gestureCooldown = 600;
 
 
 function showError(message) {
@@ -65,7 +67,7 @@ async function loadHandModel() {
 
 async function sendMousePosition(x, y) {
   try {
-    await fetch(`${serverUrl}/move`, {
+    const response = await fetch(`${serverUrl}/move`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -75,6 +77,8 @@ async function sendMousePosition(x, y) {
         y: y
       })
     });
+    if (!response.ok) throw new Error("Mouse server rejected movement");
+    serverStatus.textContent = "Local mouse control: connected";
   } catch (error) {
     serverStatus.textContent = "Local mouse control: unavailable";
     console.error("Mouse movement request failed:", error);
@@ -84,7 +88,7 @@ async function sendMousePosition(x, y) {
 
 async function sendClick(button) {
   try {
-    await fetch(`${serverUrl}/click`, {
+    const response = await fetch(`${serverUrl}/click`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -93,6 +97,8 @@ async function sendClick(button) {
         button: button
       })
     });
+    if (!response.ok) throw new Error("Mouse server rejected click");
+    serverStatus.textContent = "Local mouse control: connected";
   } catch (error) {
     serverStatus.textContent = "Local mouse control: unavailable";
     console.error("Click request failed:", error);
@@ -102,16 +108,23 @@ async function sendClick(button) {
 
 async function sendDoubleClick() {
   try {
-    await fetch(`${serverUrl}/double-click`, {
+    const response = await fetch(`${serverUrl}/double-click`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       }
     });
+    if (!response.ok) throw new Error("Mouse server rejected double click");
+    serverStatus.textContent = "Local mouse control: connected";
   } catch (error) {
     serverStatus.textContent = "Local mouse control: unavailable";
     console.error("Double click request failed:", error);
   }
+}
+
+
+function landmarkDistance(first, second) {
+  return Math.hypot(first.x - second.x, first.y - second.y);
 }
 
 
@@ -135,25 +148,31 @@ function moveCursorWithIndexFinger(landmarks) {
 
 
 function detectGesture(landmarks) {
+  const thumbTip = landmarks[4];
   const indexTip = landmarks[8];
   const indexPip = landmarks[6];
-
   const middleTip = landmarks[12];
   const middlePip = landmarks[10];
 
-  const indexStraight = indexTip.y < indexPip.y;
-  const middleStraight = middleTip.y < middlePip.y;
+  // Scale the pinch threshold to the user's hand size.
+  const handScale = landmarkDistance(landmarks[0], landmarks[9]);
+  const pinchThreshold = handScale * 0.48;
+  const indexPinched = landmarkDistance(thumbTip, indexTip) < pinchThreshold;
+  const middlePinched = landmarkDistance(thumbTip, middleTip) < pinchThreshold;
+
+  const indexStraight = indexTip.y < indexPip.y - 0.02;
+  const middleStraight = middleTip.y < middlePip.y - 0.02;
 
   let currentGesture = "None";
 
-  if (indexStraight && middleStraight) {
-    currentGesture = "Move";
-  } else if (!indexStraight && middleStraight) {
-    currentGesture = "Left Click";
-  } else if (indexStraight && !middleStraight) {
-    currentGesture = "Right Click";
-  } else {
+  if (indexPinched && middlePinched) {
     currentGesture = "Double Click";
+  } else if (indexPinched) {
+    currentGesture = "Left Click";
+  } else if (middlePinched) {
+    currentGesture = "Right Click";
+  } else if (indexStraight && !middleStraight) {
+    currentGesture = "Move";
   }
 
   gestureStatus.textContent = currentGesture;
@@ -163,10 +182,10 @@ function detectGesture(landmarks) {
   if (
     currentGesture !== "Move" &&
     currentGesture !== "None" &&
-    currentGesture !== lastGesture &&
+    !gestureLocked &&
     now - lastGestureTime > gestureCooldown
   ) {
-    lastGesture = currentGesture;
+    gestureLocked = true;
     lastGestureTime = now;
 
     if (currentGesture === "Left Click") {
@@ -178,8 +197,12 @@ function detectGesture(landmarks) {
     }
   }
 
+  if (currentGesture === "Move" || currentGesture === "None") {
+    gestureLocked = false;
+  }
+
   if (currentGesture === "Move") {
-    lastGesture = "Move";
+    moveCursorWithIndexFinger(landmarks);
   }
 }
 
@@ -257,7 +280,7 @@ function stopCamera() {
   startBtn.disabled = false;
   stopBtn.disabled = true;
 
-  lastGesture = "None";
+  gestureLocked = false;
   lastGestureTime = 0;
 }
 
@@ -297,7 +320,6 @@ function detectHands() {
 
       handStatus.textContent = "Detected";
 
-      moveCursorWithIndexFinger(landmarks);
       detectGesture(landmarks);
     } else {
       handStatus.textContent = "Not detected";
@@ -315,7 +337,7 @@ stopBtn.addEventListener("click", stopCamera);
 cameraStatus.textContent = "Camera stopped";
 stopBtn.disabled = true;
 
-fetch(`${serverUrl}/`, { method: "GET" })
+fetch(`${serverUrl}/health`, { method: "GET" })
   .then((response) => {
     serverStatus.textContent = response.ok
       ? "Local mouse control: connected"
