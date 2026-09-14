@@ -46,7 +46,7 @@ Allow Camera access when macOS asks. For real mouse clicks, allow the terminal/P
 ## Easiest way to use the web app
 
 1. Complete the one-time install above.
-2. Double-click `start_virtual_mouse.command`. It starts the local mouse-control server and opens the app in your browser.
+2. Double-click `start_virtual_mouse.command`. It starts the local mouse-control server on port 8765 and opens the app in your browser.
 3. In **System Settings → Privacy & Security → Accessibility**, enable the terminal application that opened the server. Without this macOS permission, websites cannot move or click your cursor.
 4. Click **Start Camera**. Point your index finger to move, pinch thumb + index to left-click, thumb + middle to right-click, and pinch all three to double-click.
 

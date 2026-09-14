@@ -6,6 +6,7 @@ import webbrowser
 from pathlib import Path
 
 WEB_DIRECTORY = Path(__file__).parent / "web"
+PORT = 8765
 app = Flask(__name__)
 
 CORS(
@@ -144,9 +145,9 @@ def double_click_mouse():
 
 
 if __name__ == "__main__":
-    webbrowser.open("http://127.0.0.1:5000")
+    webbrowser.open(f"http://127.0.0.1:{PORT}")
     app.run(
         host="127.0.0.1",
-        port=5000,
+        port=PORT,
         debug=False
     )

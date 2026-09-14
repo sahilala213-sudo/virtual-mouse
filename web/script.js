@@ -22,7 +22,7 @@ const serverStatus = document.getElementById("serverStatus");
 // A browser cannot directly control the operating-system cursor.
 const isLocalApp = ["127.0.0.1", "localhost"].includes(window.location.hostname);
 const serverUrl = new URLSearchParams(window.location.search).get("server") ||
-  (isLocalApp ? window.location.origin : "http://127.0.0.1:5000");
+  (isLocalApp ? window.location.origin : "http://127.0.0.1:8765");
 
 let stream = null;
 let handLandmarker = null;
